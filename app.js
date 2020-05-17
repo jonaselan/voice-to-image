@@ -1,28 +1,33 @@
-// const axios = require('axios').default;
+const axios = require('axios').default;
 const request = require('request')
 const cheerio = require("cheerio")
 const express = require('express')
 const bodyParser = require('body-parser');
 const app = express() // Create Express app
+require('dotenv').config()
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set('views', __dirname)
 
-// axios.get('http://www.sitepoint.com').then(function (response) {
-//   // var $ = cheerio.load(response.body);
-//   // console.log($);
-// }).catch(function (error) {
-//   // handle error
-//   console.log(error);
-// })
+async function fetchSongId() {
+  axios.get(process.env.GENIUS_API_URL + '/songs/378195', {
+    headers: { 'Authorization': `Bearer ${process.env.GENIUS_TOKEN}` }
+  }).then(function (response) {
+    console.log(response.data);
+  }).catch(function (error) {
+    console.log(error);
+  })
+}
 
-app.post('/generate', function(req, res){
+app.post('/generate', async function(req, res){
   // TODO: remove useless words
   // TODO: remove [words]
   // TODO: remove numbers
   // TODO: ignore '.', ','
+  // TODO: split in multiple files
 
-  const { song_id } = req.body
+  const { song } = req.body
+  const song_id = await fetchSongId(song)
   request({ uri: `https://genius.com/songs/${song_id}`, }, function(error, response, body) {
     var $ = cheerio.load(body);
 
@@ -37,7 +42,7 @@ app.post('/generate', function(req, res){
   res.render('index.ejs')
 });
 
-app.get('/', function(req, res){
+app.get('/', function (req, res) {
   res.render('index.ejs');
 });
 
