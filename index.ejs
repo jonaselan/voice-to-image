@@ -4,9 +4,38 @@
   </head>
   <body>
     <h1> Voice to image </h1>
-    <form action='/generate' method='post'>
-      <input name='song' type='text' required>
+    <form action='/search' method='post'>
+      <input name='term' type='text' required>
       <input type='submit'>
     </form>
+
+    <% if (typeof(search_items) !== "undefined") { %>
+      <table>
+        <tr>
+          <th> band/artist </th>
+          <th> song </th>
+          <th> action </th>
+        </tr>
+
+        <% search_items.forEach(function(item){ %>
+          <% item = item.result %>
+          <tr>
+            <td>
+              <a href="<%= item.primary_artist.url %>">
+                <%= item.primary_artist.name %>
+              </a>
+            </td>
+            <td>
+              <img src="<%= item.song_art_image_thumbnail_url %>" style="height: 50%;">
+              <br>
+              <a href="<%= item.url %>"> <%= item.title %> </a>
+            </td>
+            <td>
+              <button type="button"> to image! </button>
+            </td>
+          </tr>
+        <% }) %>
+      </table>
+    <% } %>
   </body>
 </html>
