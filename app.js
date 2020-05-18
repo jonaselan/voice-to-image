@@ -15,12 +15,20 @@ const axios = axios_default.create({
 
 // TODO: split in multiple files: api, pages, routes
 
-async function fetchSongId() {
-  axios.get('/songs/378195').then(function (response) {
-    console.log(response.data);
-  }).catch(function (error) {
-    console.log(error);
-  })
+async function fetchLyric(song_id) {
+  request({ uri: `https://genius.com/songs/${song_id}`, }, function(error, response, body) {
+    var $ = cheerio.load(body);
+    var text
+
+    $(".lyrics").each(function() {
+      var link = $(this);
+      text = link.text();
+
+      // console.log(text);
+    });
+
+    return text
+  });
 }
 
 async function search(term) {
@@ -33,26 +41,18 @@ async function search(term) {
   })
 }
 
-app.post('/generate', async function(req, res){
+app.get('/generate/:song_id', async function(req, res){
   // TODO: remove useless words
   // TODO: remove [words]
   // TODO: remove numbers
   // TODO: ignore '.', ','
 
-  const { song } = req.body
-  const song_id = await fetchSongId(song)
-  request({ uri: `https://genius.com/songs/${song_id}`, }, function(error, response, body) {
-    var $ = cheerio.load(body);
+  const { song_id } = req.params
+  const lyric = fetchLyric(song_id)
+  console.log(lyric);
 
-    $(".lyrics").each(function() {
-      var link = $(this);
-      var text = link.text();
-
-      console.log(text);
-    });
-  });
-
-  res.render('index.ejs')
+  // TODO: retornar para a tela atual
+  // res.render('index.ejs')
 });
 
 app.post('/search', async function(req, res) {

@@ -10,11 +10,11 @@
     </form>
 
     <% if (typeof(search_items) !== "undefined") { %>
-      <table>
+      <table style="text-align: center;">
         <tr>
-          <th> band/artist </th>
-          <th> song </th>
-          <th> action </th>
+          <th> Band/artist </th>
+          <th> Song </th>
+          <th> Action </th>
         </tr>
 
         <% search_items.forEach(function(item){ %>
@@ -31,7 +31,7 @@
               <a href="<%= item.url %>"> <%= item.title %> </a>
             </td>
             <td>
-              <button type="button"> to image! </button>
+              <a href="/generate/<%= item.id %>"> to image! </a>
             </td>
           </tr>
         <% }) %>
