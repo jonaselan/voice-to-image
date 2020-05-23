@@ -7,7 +7,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.set('views', __dirname)
 
 const USELESS_WORDS = [
-  'the', 'a', 'an', 'and', 'or', 'don’t', 'do not', 'wasn’t', 'was not', 'to',
+  'the', 'a', 'an', 'and', 'or', 'don\’t', 'do not', 'wasn\’t', 'was not', 'to',
   'in', 'are', 'be', 'of', 'is', 'so' , '.', ','
 ]
 
@@ -38,16 +38,16 @@ async function getSongWebPage(song_id) {
 async function fetchLyric(song_id) {
   return Promise.resolve(getSongWebPage(song_id)).then(rawBody => {
     var $ = cheerio.load(rawBody, { normalizeWhitespace: true, decodeEntities: false });
-    console.log(rawBody);
+    console.log('rawBody: ' + rawBody);
     var lyric = ''
 
     $('.lyrics').each(function() {
       var link = $(this);
       lyric = link.text();
-      console.log(lyric);
 
+      console.log('lyric: ' + lyric);
     });
-    if (lyric == '') throw Error('Não foi possivel recuperar a letra desta música.')
+    if (!lyric) throw Error('Não foi possivel recuperar a letra desta música.')
 
     // remove breaklines
     return lyric.replace(/(\r\n|\n|\r)/gm," ");
@@ -67,8 +67,8 @@ function formatLyric(rawLyric) {
     finalLyric = finalLyric.replace(word, '')
   })
 
-    if (finalLyric == '') throw Error('Não foi possivel formatar a letra desta música.')
-    return finalLyric
+  if (!finalLyric) throw Error('Não foi possivel formatar a letra desta música.')
+  return finalLyric
 }
 
 app.get('/generate/:song_id', async function(req, res){
