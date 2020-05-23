@@ -1,4 +1,3 @@
-const request = require('request')
 const cheerio = require("cheerio")
 const express = require('express')
 const bodyParser = require('body-parser');
@@ -6,6 +5,11 @@ require('dotenv').config()
 const app = express() // Create Express app
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set('views', __dirname)
+
+const USELESS_WORDS = [
+  'the', 'a', 'an', 'and', 'or', 'don’t', 'do not', 'wasn’t', 'was not', 'to',
+  'in', 'are', 'be', 'of', 'is', 'so' , '.', ','
+]
 
 const axios = require('axios').default;
 const axios_genius = axios.create({
@@ -33,32 +37,56 @@ async function getSongWebPage(song_id) {
 
 async function fetchLyric(song_id) {
   return Promise.resolve(getSongWebPage(song_id)).then(rawBody => {
-    var $ = cheerio.load(rawBody, { normalizeWhitespace: true });
+    var $ = cheerio.load(rawBody, { normalizeWhitespace: true, decodeEntities: false });
+    console.log(rawBody);
     var lyric = ''
 
-    $(".lyrics").each(function() {
+    $('.lyrics').each(function() {
       var link = $(this);
       lyric = link.text();
-    });
+      console.log(lyric);
 
-    return lyric
+    });
+    if (lyric == '') throw Error('Não foi possivel recuperar a letra desta música.')
+
+    // remove breaklines
+    return lyric.replace(/(\r\n|\n|\r)/gm," ");
 
   }).catch(err => {
     console.log(err)
   });
 }
 
+function formatLyric(rawLyric) {
+  // basic format
+  let finalLyric = rawLyric.trim().toLowerCase();
+
+  finalLyric = finalLyric.replace(/ *\[[^\]]*]/, '');
+  // remove useless words
+  USELESS_WORDS.forEach(word => {
+    finalLyric = finalLyric.replace(word, '')
+  })
+
+    if (finalLyric == '') throw Error('Não foi possivel formatar a letra desta música.')
+    return finalLyric
+}
+
 app.get('/generate/:song_id', async function(req, res){
-  // TODO: remove useless words
-  // TODO: remove [words]
-  // TODO: remove numbers
-  // TODO: ignore '.', ','
-
   const { song_id } = req.params
-  const lyric = await fetchLyric(song_id)
+  var errors = []
+  try {
+    const rawLyric = await fetchLyric(song_id)
+    const lyric = formatLyric(rawLyric)
 
-  // TODO: retornar para a tela atual
-  // res.render('index.ejs')
+    console.log(lyric);
+
+    // generateImages(lyric)
+  }
+  catch (error) {
+    errors.push(error.message)
+  }
+
+  res.render('index.ejs', errors)
 });
 
 app.post('/search', async function(req, res) {
