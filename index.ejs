@@ -8,6 +8,13 @@
       <input name='term' type='text' required>
       <input type='submit'>
     </form>
+    <% if (typeof(errors) !== "undefined") { %>
+      <ul>
+        <% errors.forEach(error => { %>
+        <li> <%= error %> </li>
+        <% }) %>
+      </ul>
+    <% } %>
 
     <% if (typeof(search_items) !== "undefined") { %>
       <table style="text-align: center;">
