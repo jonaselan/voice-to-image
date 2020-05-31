@@ -1,4 +1,5 @@
 require('dotenv').config()
+const fs = require('fs');
 const cheerio = require("cheerio")
 const express = require('express')
 const bodyParser = require('body-parser')
@@ -10,6 +11,7 @@ const app = express() // Create Express app
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set('views', __dirname)
 
+const MAX_LYRIC_LENGTH = 50
 const {
   GENIUS_API_URL,
   GENIUS_TOKEN,
@@ -78,28 +80,56 @@ function formatLyric(rawLyric) {
   })
 
   if (!finalLyric) throw Error('Couldn\'t format lyrics for this song')
-  return finalLyric
+  return finalLyric.split(' ')
 }
 
 async function fetchImagesBasedOnLyrics(lyric) {
-  const arrayWords = lyric.split(' ')
+  const lyricLength = lyric.length
+  if (lyricLength > MAX_LYRIC_LENGTH) {
+    throw Error(`Max length for lyric is ${MAX_LYRIC_LENGTH}. This song have ${lyricLength} formatted`)
+  }
+  const result = new Array()
 
   try {
-    for (let i = 0; i < arrayWords.length; i++) {
-    let word = arrayWords[i]
+    for (let i = 0; i < lyricLength; i++) {
+      const word = lyric[i]
 
       const response = await customSearch.cse.list({
         cx: SEARCH_ENGINE_ID,
         q: word,
         auth: GOOGLE_API_KEY,
         searchType: 'image',
-        num: 1
+        num: 5
       })
 
-      // TODO: gerar mais resultados e pegar um randomicamente
-      // TODO: lidar quando não for retornado nenhuma imagem
-      await downloadAndSave(response.data.items[0].link, `${i}-${word}.png`)
+      // TODO: lidar melhor quando não for retornado nenhuma imagem, talvez criar uma imagem vazia
+      if (response.data.items) {
+        const item = pickRandomImage(response.data.items)
+        result.push({ title: `${i}-${word}.png`, url: item.link })
+      }
     }
+  }
+  catch (error) {
+    console.log(chalk.red(`Error trying to fetch images: ${error}`))
+  }
+
+  return result
+}
+
+function pickRandomImage(links) {
+  return links[Math.floor(Math.random() * links.length)];
+}
+
+async function downloadAndSave(folder, images) {
+  const dir = `./content/${folder}`;
+  if (!fs.existsSync(dir)){
+    fs.mkdirSync(dir);
+  }
+
+  try {
+    images.forEach(async img => {
+      await imageDownloader.image({ url: img.url, dest: `${dir}/${img.title}` })
+    })
 
     return true
   }
@@ -108,20 +138,14 @@ async function fetchImagesBasedOnLyrics(lyric) {
   }
 }
 
-async function downloadAndSave(url, fileName) {
-  return imageDownloader.image({
-    url: url,
-    dest: `./content/${fileName}`
-  })
-}
-
 app.get('/generate/:song_id', async function(req, res){
   const { song_id } = req.params
   var errors = []
   try {
     const rawLyric = await fetchLyric(song_id)
-    const lyric = formatLyric(rawLyric)
-    await fetchImagesBasedOnLyrics(lyric)
+    const formattedlyric = formatLyric(rawLyric)
+    const images = await fetchImagesBasedOnLyrics(formattedlyric)
+    await downloadAndSave(song_id, images)
   }
   catch (error) {
     errors.push(error.message)
@@ -142,6 +166,3 @@ app.get('/', async function (req, res) {
 });
 
 app.listen(3000, () => console.log('Server running on port 3000!'))
-
-// TODO: limit size lyric
-// TODO: create a folder with title song
