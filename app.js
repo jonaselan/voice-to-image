@@ -2,8 +2,10 @@ require('dotenv').config()
 const cheerio = require("cheerio")
 const express = require('express')
 const bodyParser = require('body-parser')
+const chalk = require('chalk');
 const google = require('googleapis').google
 const customSearch = google.customsearch('v1')
+const imageDownloader = require('image-downloader')
 const app = express() // Create Express app
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set('views', __dirname)
@@ -15,8 +17,8 @@ const {
   SEARCH_ENGINE_ID
 } = process.env
 const USELESS_WORDS = [
-  'the', 'a', 'an', 'and', 'or', 'don\’t', 'do not', 'wasn\’t', 'was not',
-  'in', 'are', 'be', 'of', 'is', 'so', 'to', '.', ','
+  'can not', 'can\'t', 'don\'t', 'do not', 'wasn\'t', 'was not', 'it\'s',
+  'in', 'are', 'be', 'of', 'is', 'so', 'to', 'the', 'a', 'an', 'and', 'or', '.', ','
 ]
 
 const axios = require('axios').default;
@@ -31,7 +33,7 @@ async function search(term) {
       return response.data.response.hits;
     }
   }).catch(function (error) {
-    console.log(error);
+    console.log(chalk.red(error))
   })
 }
 
@@ -39,29 +41,29 @@ async function getSongWebPage(song_id) {
   return axios.get(`https://genius.com/songs/${song_id}`).then(function (response) {
     return response.data;
   }).catch(function (error) {
-    console.log(error);
+    console.log(chalk.red(error))
   })
 }
 
 async function fetchLyric(song_id) {
   return Promise.resolve(getSongWebPage(song_id)).then(rawBody => {
     var $ = cheerio.load(rawBody, { normalizeWhitespace: true, decodeEntities: false });
-    console.log('rawBody: ' + rawBody);
+    console.log(chalk.blue('rawBody: ' + rawBody))
     var lyric = ''
 
     $('.lyrics').each(function() {
       var link = $(this);
       lyric = link.text();
 
-      console.log('lyric: ' + lyric);
+    console.log(chalk.blue('lyric: ' + lyric))
     });
-    if (!lyric) throw Error('Não foi possivel recuperar a letra desta música.')
+    if (!lyric) throw Error('Couldn\'t fetch lyric for this song')
 
     // remove breaklines
     return lyric.replace(/(\r\n|\n|\r)/gm," ");
 
-  }).catch(err => {
-    console.log(err)
+  }).catch(error => {
+    console.log(chalk.red(error))
   });
 }
 
@@ -75,23 +77,42 @@ function formatLyric(rawLyric) {
     finalLyric = finalLyric.replace(word, '')
   })
 
-  if (!finalLyric) throw Error('Não foi possivel formatar a letra desta música.')
+  if (!finalLyric) throw Error('Couldn\'t format lyrics for this song')
   return finalLyric
 }
 
-async function fetchImagesFromGoogle(query) {
-  const response = await customSearch.cse.list({
-    cx: SEARCH_ENGINE_ID,
-    q: query,
-    auth: GOOGLE_API_KEY,
-    searchType: 'image',
-    num: 2
-  })
+async function fetchImagesBasedOnLyrics(lyric) {
+  const arrayWords = lyric.split(' ')
 
-  const imagesUrl = response.data.items.map((item) => {
-    return item.link
+  try {
+    for (let i = 0; i < arrayWords.length; i++) {
+    let word = arrayWords[i]
+
+      const response = await customSearch.cse.list({
+        cx: SEARCH_ENGINE_ID,
+        q: word,
+        auth: GOOGLE_API_KEY,
+        searchType: 'image',
+        num: 1
+      })
+
+      // TODO: gerar mais resultados e pegar um randomicamente
+      // TODO: lidar quando não for retornado nenhuma imagem
+      await downloadAndSave(response.data.items[0].link, `${i}-${word}.png`)
+    }
+
+    return true
+  }
+  catch (error) {
+    console.log(chalk.red(`Error trying to download or save images: ${error}`))
+  }
+}
+
+async function downloadAndSave(url, fileName) {
+  return imageDownloader.image({
+    url: url,
+    dest: `./content/${fileName}`
   })
-  console.log(imagesUrl);
 }
 
 app.get('/generate/:song_id', async function(req, res){
@@ -100,10 +121,7 @@ app.get('/generate/:song_id', async function(req, res){
   try {
     const rawLyric = await fetchLyric(song_id)
     const lyric = formatLyric(rawLyric)
-
-    console.log(lyric);
-
-    // generateImages(lyric)
+    await fetchImagesBasedOnLyrics(lyric)
   }
   catch (error) {
     errors.push(error.message)
@@ -120,8 +138,10 @@ app.post('/search', async function (req, res) {
 });
 
 app.get('/', async function (req, res) {
-  await fetchImagesFromGoogle('Avenged sevenfold')
   res.render('index.ejs');
 });
 
 app.listen(3000, () => console.log('Server running on port 3000!'))
+
+// TODO: limit size lyric
+// TODO: create a folder with title song
