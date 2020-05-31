@@ -1,20 +1,28 @@
+require('dotenv').config()
 const cheerio = require("cheerio")
 const express = require('express')
-const bodyParser = require('body-parser');
-require('dotenv').config()
+const bodyParser = require('body-parser')
+const google = require('googleapis').google
+const customSearch = google.customsearch('v1')
 const app = express() // Create Express app
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set('views', __dirname)
 
+const {
+  GENIUS_API_URL,
+  GENIUS_TOKEN,
+  GOOGLE_API_KEY,
+  SEARCH_ENGINE_ID
+} = process.env
 const USELESS_WORDS = [
-  'the', 'a', 'an', 'and', 'or', 'don\’t', 'do not', 'wasn\’t', 'was not', 'to',
-  'in', 'are', 'be', 'of', 'is', 'so' , '.', ','
+  'the', 'a', 'an', 'and', 'or', 'don\’t', 'do not', 'wasn\’t', 'was not',
+  'in', 'are', 'be', 'of', 'is', 'so', 'to', '.', ','
 ]
 
 const axios = require('axios').default;
 const axios_genius = axios.create({
-  baseURL: process.env.GENIUS_API_URL,
-  headers: { 'Authorization': `Bearer ${process.env.GENIUS_TOKEN}` }
+  baseURL: GENIUS_API_URL,
+  headers: { 'Authorization': `Bearer ${GENIUS_TOKEN}` }
 });
 
 async function search(term) {
@@ -71,6 +79,21 @@ function formatLyric(rawLyric) {
   return finalLyric
 }
 
+async function fetchImagesFromGoogle(query) {
+  const response = await customSearch.cse.list({
+    cx: SEARCH_ENGINE_ID,
+    q: query,
+    auth: GOOGLE_API_KEY,
+    searchType: 'image',
+    num: 2
+  })
+
+  const imagesUrl = response.data.items.map((item) => {
+    return item.link
+  })
+  console.log(imagesUrl);
+}
+
 app.get('/generate/:song_id', async function(req, res){
   const { song_id } = req.params
   var errors = []
@@ -89,14 +112,15 @@ app.get('/generate/:song_id', async function(req, res){
   res.render('index.ejs', errors)
 });
 
-app.post('/search', async function(req, res) {
+app.post('/search', async function (req, res) {
   const { term } = req.body
   const search_items = await search(term)
 
   res.render('index.ejs', { search_items })
 });
 
-app.get('/', function (req, res) {
+app.get('/', async function (req, res) {
+  await fetchImagesFromGoogle('Avenged sevenfold')
   res.render('index.ejs');
 });
 
