@@ -10,7 +10,6 @@ const {
 } = require('./helpers/lyric');
 
 routes.get('/', async function (req, res) {
-
   res.render('index.ejs');
 });
 

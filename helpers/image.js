@@ -3,6 +3,11 @@ const imageDownloader = require('image-downloader')
 const chalk = require('chalk');
 const google = require('googleapis').google
 const customSearch = google.customsearch('v1')
+const gm = require('gm').subClass({ imageMagick: true })
+const path = require('path')
+const rootPath = path.resolve(__dirname, '..')
+
+const fromRoot = relPath => path.resolve(rootPath, relPath)
 const MAX_LYRIC_LENGTH = 50
 const {
   GOOGLE_API_KEY,
@@ -31,7 +36,9 @@ async function fetchImagesBasedOnLyrics(lyric) {
       // TODO: lidar melhor quando não for retornado nenhuma imagem, talvez criar uma imagem vazia
       if (response.data.items) {
         const item = pickRandomImage(response.data.items)
-        result.push({ title: `${i}-${word}.png`, url: item.link })
+        const title = `${i}-${word}.png`
+
+        result.push({ title, url: item.link })
       }
     }
   }
@@ -47,10 +54,12 @@ async function downloadAndSave(folder, images) {
   if (!fs.existsSync(dir)){
     fs.mkdirSync(dir);
   }
+  const dest = `${dir}/${img.title}`
 
   try {
     images.forEach(async img => {
-      await imageDownloader.image({ url: img.url, dest: `${dir}/${img.title}` })
+      await imageDownloader.image({ url: img.url, dest })
+      await convertImage(dest)
     })
 
     return true
@@ -60,6 +69,43 @@ async function downloadAndSave(folder, images) {
   }
 }
 
+async function convertImage(title) {
+  return new Promise((resolve, reject) => {
+    const inputFile = fromRoot(`./content/${title}[0]`)
+    const outputFile = fromRoot(`./content/${title}-converted.png`)
+    const width = 1920
+    const height = 1080
+
+    gm()
+      .in(inputFile)
+      .out('(')
+        .out('-clone')
+        .out('0')
+        .out('-background', 'white')
+        .out('-blur', '0x9')
+        .out('-resize', `${width}x${height}^`)
+      .out(')')
+      .out('(')
+        .out('-clone')
+        .out('0')
+        .out('-background', 'white')
+        .out('-resize', `${width}x${height}`)
+      .out(')')
+      .out('-delete', '0')
+      .out('-gravity', 'center')
+      .out('-compose', 'over')
+      .out('-composite')
+      .out('-extent', `${width}x${height}`)
+      .write(outputFile, (error) => {
+        if (error) {
+          return reject(error)
+        }
+
+        resolve()
+      })
+  })
+}
+
 function pickRandomImage(links) {
   return links[Math.floor(Math.random() * links.length)];
 }
@@ -67,4 +113,5 @@ function pickRandomImage(links) {
 module.exports = {
   fetchImagesBasedOnLyrics,
   downloadAndSave,
+  convertImage,
 }
