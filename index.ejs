@@ -16,10 +16,11 @@
     <main>
       <form action='/search' method='post'>
         <input name='term' type='text' id="term" required>
-        <input type='submit'>
+        <!-- <input type='submit'> -->
+        <button type="submit"> Search! </button>
       </form>
       <% if (typeof(errors) !== "undefined") { %>
-        <ul>
+        <ul class="error">
           <% errors.forEach(error => { %>
           <li> <%= error %> </li>
           <% }) %>
@@ -27,9 +28,9 @@
       <% } %>
 
       <button id="start-listing"> Say a music!</button>
-        <p id="message" hidden aria-hidden="true">
-          Your browser doesn't support Speech Recognition. Sorry.
-        </p>
+      <p id="message" hidden aria-hidden="true">
+        Your browser doesn't support Speech Recognition. Sorry.
+      </p>
 
       <% if (typeof(search_items) !== "undefined") { %>
         <table style="text-align: center;">
@@ -69,13 +70,16 @@
       window.addEventListener("DOMContentLoaded", () => {
         const button = document.getElementById("start-listing");
         const term = document.getElementById("term");
-
+        const RESPONSES = [
+          'Good choice', 'I think I understand', 'hmmm', 'I don\'t like this very much',
+          'did I understand correctly?', 'Got it', ''
+        ]
         let listening = false;
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
         const response = () => {
           const speech = new SpeechSynthesisUtterance();
-          speech.text = 'You\'re welcome'
+          speech.text = RESPONSES[Math.floor(Math.random() * RESPONSES.length)]
           speech.volume = 1
           speech.rate = 1
           speech.pitch = 1
@@ -106,7 +110,7 @@
             const { transcript } = event.results[current][0]
 
             term.value = transcript;
-            // response()
+            response()
           };
 
           // recognition.continuous = true;
