@@ -1,48 +1,128 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
   <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title> Voice to image </title>
+    <link rel="stylesheet" type="text/css" href="/css/style.css" />
   </head>
+
   <body>
-    <h1> Voice to image </h1>
-    <form action='/search' method='post'>
-      <input name='term' type='text' required>
-      <input type='submit'>
-    </form>
-    <% if (typeof(errors) !== "undefined") { %>
-      <ul>
-        <% errors.forEach(error => { %>
-        <li> <%= error %> </li>
-        <% }) %>
-      </ul>
-    <% } %>
+    <header>
+      <h1> Voice to image </h1>
+    </header>
 
-    <% if (typeof(search_items) !== "undefined") { %>
-      <table style="text-align: center;">
-        <tr>
-          <th> Band/artist </th>
-          <th> Song </th>
-          <th> Action </th>
-        </tr>
+    <main>
+      <form action='/search' method='post'>
+        <input name='term' type='text' id="term" required>
+        <input type='submit'>
+      </form>
+      <% if (typeof(errors) !== "undefined") { %>
+        <ul>
+          <% errors.forEach(error => { %>
+          <li> <%= error %> </li>
+          <% }) %>
+        </ul>
+      <% } %>
 
-        <% search_items.forEach(function(item){ %>
-          <% item = item.result %>
+      <button id="start-listing"> Say a music!</button>
+        <p id="message" hidden aria-hidden="true">
+          Your browser doesn't support Speech Recognition. Sorry.
+        </p>
+
+      <% if (typeof(search_items) !== "undefined") { %>
+        <table style="text-align: center;">
           <tr>
-            <td>
-              <a href="<%= item.primary_artist.url %>">
-                <%= item.primary_artist.name %>
-              </a>
-            </td>
-            <td>
-              <img src="<%= item.song_art_image_thumbnail_url %>" style="height: 50%;">
-              <br>
-              <a href="<%= item.url %>"> <%= item.title %> </a>
-            </td>
-            <td>
-              <a href="/generate/<%= item.id %>"> to image! </a>
-            </td>
+            <th> Band/artist </th>
+            <th> Song </th>
+            <th> Action </th>
           </tr>
-        <% }) %>
-      </table>
-    <% } %>
+
+          <% search_items.forEach(function(item){ %>
+            <% item = item.result %>
+            <tr>
+              <td>
+                <a href="<%= item.primary_artist.url %>">
+                  <%= item.primary_artist.name %>
+                </a>
+              </td>
+              <td>
+                <img src="<%= item.song_art_image_thumbnail_url %>" style="height: 50%;">
+                <br>
+                <a href="<%= item.url %>"> <%= item.title %> </a>
+              </td>
+              <td>
+                <a href="/generate/<%= item.id %>"> to image! </a>
+              </td>
+            </tr>
+          <% }) %>
+        </table>
+      <% } %>
+    </main>
+
+    <footer>
+      <p>Built by <a target="blank" href="https://github.com/jonaselan">Jonas Elan</a></p>
+    </footer>
+
+    <script>
+      window.addEventListener("DOMContentLoaded", () => {
+        const button = document.getElementById("start-listing");
+        const term = document.getElementById("term");
+
+        let listening = false;
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+        const response = () => {
+          const speech = new SpeechSynthesisUtterance();
+          speech.text = 'You\'re welcome'
+          speech.volume = 1
+          speech.rate = 1
+          speech.pitch = 1
+
+          window.speechSynthesis.speak(speech)
+        }
+
+        if (typeof SpeechRecognition !== "undefined") {
+          const recognition = new SpeechRecognition();
+
+          const stop = () => {
+            button.classList.remove("speaking");
+            recognition.stop();
+            button.textContent = "Start listening";
+          };
+
+          const start = () => {
+            button.classList.add("speaking");
+            recognition.start();
+            button.textContent = "Stop listening";
+          };
+
+          const onResult = event => {
+            term.value = "";
+
+            const current = event.resultIndex
+
+            const { transcript } = event.results[current][0]
+
+            term.value = transcript;
+            // response()
+          };
+
+          // recognition.continuous = true;
+          // recognition.interimResults = true;
+          recognition.addEventListener("result", onResult);
+          button.addEventListener("click", event => {
+            listening ? stop() : start();
+            listening = !listening;
+          });
+        } else {
+          button.remove();
+          const message = document.getElementById("message");
+          message.removeAttribute("hidden");
+          message.setAttribute("aria-hidden", "false");
+        }
+      });
+    </script>
   </body>
 </html>
