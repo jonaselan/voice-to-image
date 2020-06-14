@@ -14,9 +14,12 @@
     </header>
 
     <main>
+      <button id="start-listing"> Say a music!</button>
+      <p id="message" hidden aria-hidden="true">
+        Your browser doesn't support Speech Recognition. Sorry.
+      </p>
       <form action='/search' method='post'>
         <input name='term' type='text' id="term" required>
-        <!-- <input type='submit'> -->
         <button type="submit"> Search! </button>
       </form>
       <% if (typeof(errors) !== "undefined") { %>
@@ -27,13 +30,8 @@
         </ul>
       <% } %>
 
-      <button id="start-listing"> Say a music!</button>
-      <p id="message" hidden aria-hidden="true">
-        Your browser doesn't support Speech Recognition. Sorry.
-      </p>
-
       <% if (typeof(search_items) !== "undefined") { %>
-        <table style="text-align: center;">
+        <table>
           <tr>
             <th> Band/artist </th>
             <th> Song </th>
@@ -44,13 +42,15 @@
             <% item = item.result %>
             <tr>
               <td>
+                <img src="<%= item.primary_artist.image_url %>">
+                <br> <br> <br>
                 <a href="<%= item.primary_artist.url %>">
                   <%= item.primary_artist.name %>
                 </a>
               </td>
               <td>
-                <img src="<%= item.song_art_image_thumbnail_url %>" style="height: 50%;">
-                <br>
+                <img src="<%= item.song_art_image_thumbnail_url %>">
+                <br> <br> <br>
                 <a href="<%= item.url %>"> <%= item.title %> </a>
               </td>
               <td>

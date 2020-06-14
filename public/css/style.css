@@ -30,7 +30,7 @@ main {
   background-color: #fff;
   border-radius: 12px;
   margin-bottom: 2em;
-  padding-top: 4em;
+  padding-top: 1em;
   text-align: center;
 }
 @keyframes bg-pulse {
@@ -46,6 +46,29 @@ main {
     background-color: #fff;
   }
 }
+img {
+  float: left;
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+}
+table {
+  margin-top: 25px;
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+  border: 1px solid black;
+  width: 60%;
+}
+/* table, th, td {
+  border: 1px solid black;
+} */
+td {
+  padding: 15px 70px;
+}
+tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
 .speaking {
   animation: bg-pulse 1.5s alternate ease-in-out infinite;
 }
@@ -58,25 +81,33 @@ main {
   color: #0d122b;
   font-style: normal;
 }
+input[type=text] {
+  padding: 15px 20px;
+  margin: 8px 0;
+  box-sizing: border-box;
+}
+input[type=text]:focus {
+  border: 2px solid #f2f2f2;
+}
 button {
   font-size: 18px;
   font-weight: 200;
-  padding: 1em;
-  width: 150px;
+  padding: 10px 1em;
   background: transparent;
-  border: 4px solid #f22f46;
+  border: 2px solid #0d122b;
   border-radius: 4px;
   transition: all 0.4s ease 0s;
   cursor: pointer;
-  color: #f22f46;
-  /* margin-bottom: 4em; */
+  color: #0d122b;
 }
 button:hover,
 button:focus {
-  background: #f22f46;
+  background: #0d122b;
   color: #fff;
 }
-
+#start-listing {
+  margin-bottom: 20px;
+}
 a {
   color: #0d122b;
 }
