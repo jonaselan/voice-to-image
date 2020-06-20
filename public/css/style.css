@@ -46,7 +46,7 @@ main {
     background-color: #fff;
   }
 }
-img {
+.cover {
   float: left;
   width: 150px;
   height: 150px;
@@ -114,6 +114,13 @@ a {
 .error {
   color: #f22f46;
   text-align: center;
+}
+.histories {
+  list-style-type: none;
+  text-align: center;
+}
+.history-img {
+  height: 15px;
 }
 footer {
   border-top: 1px solid #0d122b;

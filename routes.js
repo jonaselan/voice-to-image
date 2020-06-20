@@ -8,9 +8,11 @@ const {
   fetchLyric,
   formatLyric,
 } = require('./helpers/lyric');
+const history = require('./helpers/history');
 
 routes.get('/', async function (req, res) {
-  res.render('index.ejs');
+  const histories = history.load()
+  res.render('index.ejs', { histories });
 });
 
 routes.get('/generate/:song_id', async function(req, res){
@@ -26,7 +28,7 @@ routes.get('/generate/:song_id', async function(req, res){
     errors.push(error.message)
   }
 
-  res.render('index.ejs', errors)
+  res.render('index.ejs', { errors })
 });
 
 routes.post('/search', async function (req, res) {

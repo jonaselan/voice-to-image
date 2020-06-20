@@ -30,6 +30,17 @@
         </ul>
       <% } %>
 
+      <% if (typeof(histories) !== "undefined") { %>
+        <ul class="histories">
+          <% histories.forEach(history => { %>
+            <li title="<%= Object.keys(history)[0] %>">
+              <img class="history-img" src="/images/history.png" alt="">
+              <%= Object.values(history)[0] %>
+            </li>
+          <% }) %>
+        </ul>
+      <% } %>
+
       <% if (typeof(search_items) !== "undefined") { %>
         <table>
           <tr>
@@ -42,14 +53,14 @@
             <% item = item.result %>
             <tr>
               <td>
-                <img src="<%= item.primary_artist.image_url %>">
+                <img class="cover" src="<%= item.primary_artist.image_url %>">
                 <br> <br> <br>
                 <a href="<%= item.primary_artist.url %>">
                   <%= item.primary_artist.name %>
                 </a>
               </td>
               <td>
-                <img src="<%= item.song_art_image_thumbnail_url %>">
+                <img class="cover" src="<%= item.song_art_image_thumbnail_url %>">
                 <br> <br> <br>
                 <a href="<%= item.url %>"> <%= item.title %> </a>
               </td>
