@@ -6,6 +6,8 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title> Voice to image </title>
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
+    <script src="https://unpkg.com/wavesurfer.js"></script>
+    <script src="https://unpkg.com/wavesurfer.js/dist/plugin/wavesurfer.microphone.min.js"></script>
   </head>
 
   <body>
@@ -14,6 +16,7 @@
     </header>
 
     <main>
+      <div id="waveform"></div>
       <button id="start-listing"> Say a music!</button>
       <p id="message" hidden aria-hidden="true">
         Your browser doesn't support Speech Recognition. Sorry.
@@ -78,6 +81,9 @@
     </footer>
 
     <script>
+      const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+      const wavesurfer, context, processor;
+
       window.addEventListener("DOMContentLoaded", () => {
         const button = document.getElementById("start-listing");
         const term = document.getElementById("term");
@@ -124,12 +130,12 @@
             response()
           };
 
-          // recognition.continuous = true;
-          // recognition.interimResults = true;
           recognition.addEventListener("result", onResult);
           button.addEventListener("click", event => {
             listening ? stop() : start();
             listening = !listening;
+
+            renderWaveSurfer()
           });
         } else {
           button.remove();
@@ -138,6 +144,56 @@
           message.setAttribute("aria-hidden", "false");
         }
       });
+
+      function renderWaveSurfer() {
+        if (wavesurfer === undefined) {
+          if (isSafari) {
+              // Safari 11 have issues with new AudioContext
+              var AudioContext = window.AudioContext || window.webkitAudioContext;
+              context = new AudioContext();
+              processor = context.createScriptProcessor(1024, 1, 1);
+          }
+
+          // Init wavesurfer
+          wavesurfer = WaveSurfer.create({
+              container: '#waveform',
+              waveColor: 'black',
+              interact: false,
+              cursorWidth: 0,
+              audioContext: context || null,
+              audioScriptProcessor: processor || null,
+              plugins: [
+                  WaveSurfer.microphone.create({
+                      bufferSize: 4096,
+                      numberOfInputChannels: 1,
+                      numberOfOutputChannels: 1,
+                      constraints: {
+                          video: false,
+                          audio: true
+                      }
+                  })
+              ]
+          });
+
+          wavesurfer.microphone.on('deviceReady', function() {
+              console.info('Device ready!');
+          });
+          wavesurfer.microphone.on('deviceError', function(code) {
+              console.warn('Device error: ' + code);
+          });
+          wavesurfer.on('error', function(e) {
+              console.warn(e);
+          });
+          wavesurfer.microphone.start();
+        } else {
+          // start/stop mic on button click
+          if (wavesurfer.microphone.active) {
+            wavesurfer.microphone.stop();
+          } else {
+            wavesurfer.microphone.start();
+          }
+        }
+      }
     </script>
   </body>
 </html>
