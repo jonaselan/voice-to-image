@@ -37,6 +37,7 @@ async function fetchImagesBasedOnLyrics(lyric) {
       if (response.data.items) {
         const item = pickRandomImage(response.data.items)
         const title = `${i}-${word}.png`
+        console.log(title);
 
         result.push({ title, url: item.link })
       }
@@ -54,10 +55,10 @@ async function downloadAndSave(folder, images) {
   if (!fs.existsSync(dir)){
     fs.mkdirSync(dir);
   }
-  const dest = `${dir}/${img.title}`
 
   try {
     images.forEach(async img => {
+      const dest = `${dir}/${img.title}`
       await imageDownloader.image({ url: img.url, dest })
       await convertImage(dest)
     })
@@ -71,8 +72,8 @@ async function downloadAndSave(folder, images) {
 
 async function convertImage(title) {
   return new Promise((resolve, reject) => {
-    const inputFile = fromRoot(`./content/${title}[0]`)
-    const outputFile = fromRoot(`./content/${title}-converted.png`)
+    const inputFile = fromRoot(`./${title}[0]`)
+    const outputFile = fromRoot(`./${title}-converted.png`)
     const width = 1920
     const height = 1080
 

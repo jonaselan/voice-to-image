@@ -28,16 +28,16 @@ async function searchInGenius(term) {
 async function fetchLyric(song_id) {
   return Promise.resolve(getSongWebPage(song_id)).then(rawBody => {
     var $ = cheerio.load(rawBody, { normalizeWhitespace: true, decodeEntities: false });
-    console.log(chalk.blue('rawBody: ' + rawBody))
+    // console.log(chalk.blue('rawBody: ' + rawBody))
     var lyric = ''
 
     $('.lyrics').each(function() {
       var link = $(this);
       lyric = link.text();
 
-    console.log(chalk.blue('lyric: ' + lyric))
+      console.log(chalk.blue('lyric: ' + lyric))
     });
-    if (!lyric) throw Error('Couldn\'t fetch lyric for this song')
+    console.log(lyric)
 
     // remove breaklines
     return lyric.replace(/(\r\n|\n|\r)/gm," ");
@@ -57,7 +57,6 @@ function formatLyric(rawLyric) {
     finalLyric = finalLyric.replace(word, '')
   })
 
-  if (!finalLyric) throw Error('Couldn\'t format lyrics for this song')
   return finalLyric.split(' ')
 }
 

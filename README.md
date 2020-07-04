@@ -1,5 +1,7 @@
 # Voice to Image
 
+> This project was developed with the purpose of studying
+
 Simple application to generate images through lyrics
 
 ## Requirements
@@ -9,3 +11,4 @@ Simple application to generate images through lyrics
 - [Google Custom Search](https://developers.google.com/custom-search) (Engine Search)
 - [ImageMagick](https://imagemagick.org/index.php)
 - [Ejs](https://ejs.co/)
+- [Wavesurfer.js](https://github.com/katspaugh/wavesurfer.js/)
