@@ -9,7 +9,7 @@ function formatContent(id) {
   return result
 }
 
-function save(content) {
+async function save(content) {
   const jsonContent = load()
   jsonContent.push(formatContent(content))
 
