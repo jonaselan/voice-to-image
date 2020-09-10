@@ -82,11 +82,11 @@
 
     <script>
       const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-      const wavesurfer, context, processor;
+      var wavesurfer = undefined, context  = undefined, processor = undefined;
 
-      window.addEventListener("DOMContentLoaded", () => {
-        const button = document.getElementById("start-listing");
-        const term = document.getElementById("term");
+      window.addEventListener('DOMContentLoaded', () => {
+        const button = document.getElementById('start-listing');
+        const term = document.getElementById('term');
         const RESPONSES = [
           'Good choice', 'I think I understand', 'hmmm', 'I don\'t like this very much',
           'did I understand correctly?', 'Got it', ''
@@ -104,23 +104,23 @@
           window.speechSynthesis.speak(speech)
         }
 
-        if (typeof SpeechRecognition !== "undefined") {
+        if (typeof SpeechRecognition !== 'undefined') {
           const recognition = new SpeechRecognition();
 
           const stop = () => {
-            button.classList.remove("speaking");
+            button.classList.remove('speaking');
             recognition.stop();
-            button.textContent = "Start listening";
+            button.textContent = 'Start listening';
           };
 
           const start = () => {
-            button.classList.add("speaking");
+            button.classList.add('speaking');
             recognition.start();
-            button.textContent = "Stop listening";
+            button.textContent = 'Stop listening';
           };
 
           const onResult = event => {
-            term.value = "";
+            term.value = '';
 
             const current = event.resultIndex
 
@@ -130,8 +130,8 @@
             response()
           };
 
-          recognition.addEventListener("result", onResult);
-          button.addEventListener("click", event => {
+          recognition.addEventListener('result', onResult);
+          button.addEventListener('click', event => {
             listening ? stop() : start();
             listening = !listening;
 
@@ -139,9 +139,9 @@
           });
         } else {
           button.remove();
-          const message = document.getElementById("message");
-          message.removeAttribute("hidden");
-          message.setAttribute("aria-hidden", "false");
+          const message = document.getElementById('message');
+          message.removeAttribute('hidden');
+          message.setAttribute('aria-hidden', 'false');
         }
       });
 
