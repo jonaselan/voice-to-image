@@ -8,7 +8,7 @@ const path = require('path')
 const rootPath = path.resolve(__dirname, '..')
 
 const fromRoot = relPath => path.resolve(rootPath, relPath)
-const MAX_LYRIC_LENGTH = 50
+const MAX_LYRIC_LENGTH = 135
 const {
   GOOGLE_API_KEY,
   SEARCH_ENGINE_ID

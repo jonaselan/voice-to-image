@@ -1,7 +1,7 @@
 const cheerio = require('cheerio')
 const chalk = require('chalk')
 const USELESS_WORDS = [
-  'can not', 'can\'t', 'don\'t', 'do not', 'wasn\'t', 'was not', 'it\'s',
+  'can not', 'can\'t', 'don\'t', 'do not', 'wasn\'t', 'was not', 'it\'s', 'it is',
   'in', 'are', 'be', 'of', 'is', 'so', 'to', 'the', 'a', 'an', 'and', 'or', '.', ','
 ]
 const {

@@ -17,7 +17,7 @@ async function save(content) {
 }
 
 function load() {
-  // TODO: verificar problema de estar de estar quebrando o layout
+  // TODO: verificar problema de estar quebrando o layout
   // Criar arquivo se n existir
 
   const contentJson = fs.readFileSync(historyFilePath, 'utf-8')
