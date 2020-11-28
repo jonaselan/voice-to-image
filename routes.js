@@ -23,7 +23,17 @@ routes.get('/', async function (req, res) {
   res.render('index.ejs', { histories });
 });
 
-routes.get('/generate/:song_id', async function(req, res){
+routes.post('/search', async function (req, res) {
+  const { term } = req.body
+
+  const search_items = await searchInGenius(term)
+  // TODO: fix history save
+  // history.save(term)
+
+  res.render('index.ejs', { search_items })
+});
+
+routes.get('/generate/:song_id', async function (req, res) {
   const { song_id } = req.params
   var errors = []
   try {
@@ -37,14 +47,6 @@ routes.get('/generate/:song_id', async function(req, res){
   }
 
   res.render('index.ejs', { errors })
-});
-
-routes.post('/search', async function (req, res) {
-  const { term } = req.body
-  const search_items = await searchInGenius(term)
-  await history.save(term)
-
-  res.render('index.ejs', { search_items })
 });
 
 module.exports = routes;

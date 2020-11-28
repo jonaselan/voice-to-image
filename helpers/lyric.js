@@ -1,8 +1,8 @@
 const cheerio = require('cheerio')
 const chalk = require('chalk')
 const USELESS_WORDS = [
-  'can not', 'can\'t', 'don\'t', 'do not', 'wasn\'t', 'was not', 'it\'s', 'it is',
-  'in', 'are', 'be', 'of', 'is', 'so', 'to', 'the', 'a', 'an', 'and', 'or', '.', ','
+  'can not', 'can\'t', 'don\'t', 'do not', 'wasn\'t', 'was not', 'it\'s', 'it is', 'i\'m', '[chorus]',
+  'in', 'are', 'be', 'of', 'is', 'so', 'to', 'he\'s', 'the', 'a', 'an', 'and', 'or', '.', ','
 ]
 const {
   GENIUS_API_URL,
@@ -26,38 +26,26 @@ async function searchInGenius(term) {
 }
 
 async function fetchLyric(song_id) {
-  return Promise.resolve(getSongWebPage(song_id)).then(rawBody => {
-    var $ = cheerio.load(rawBody, { normalizeWhitespace: true, decodeEntities: false });
-    // console.log(chalk.blue('rawBody: ' + rawBody))
-    var lyric = ''
+  console.log(chalk.blue(`Fetch lyric ${song_id}: start...`))
+
+  const songRawWebPage = getSongWebPage(song_id)
+  return Promise.resolve(songRawWebPage).then(rawBody => {
+    let $ = cheerio.load(rawBody, { normalizeWhitespace: true, decodeEntities: false });
+    let lyric = ''
 
     $('.lyrics').each(function() {
-      var link = $(this);
+      let link = $(this);
       lyric = link.text();
-
-      console.log(chalk.blue('lyric: ' + lyric))
     });
-    console.log(lyric)
 
-    // remove breaklines
-    return lyric.replace(/(\r\n|\n|\r)/gm," ");
+    console.log(lyric)
+    console.log(chalk.blue(`Fetch lyric ${song_id}: finished`))
+
+    return lyric;
 
   }).catch(error => {
     console.log(chalk.red(error))
   });
-}
-
-function formatLyric(rawLyric) {
-  // basic format
-  let finalLyric = rawLyric.trim().toLowerCase();
-
-  finalLyric = finalLyric.replace(/ *\[[^\]]*]/, '');
-  // remove useless words
-  USELESS_WORDS.forEach(word => {
-    finalLyric = finalLyric.replace(word, '')
-  })
-
-  return finalLyric.split(' ')
 }
 
 async function getSongWebPage(song_id) {
@@ -66,6 +54,26 @@ async function getSongWebPage(song_id) {
   }).catch(function (error) {
     console.log(chalk.red(error))
   })
+}
+
+function formatLyric(rawLyric) {
+  console.log(chalk.blue('Format lyrics: start...'))
+  let finalLyric = rawLyric
+  finalLyric = finalLyric.replace(/(\r\n|\n|\r)/gm, " ") // remove breaklines
+  finalLyric = finalLyric.trim().toLowerCase() // remove spaces
+  finalLyric = finalLyric.replace(/ *\[[^\]]*]/, '') // remove words between brackets
+
+  USELESS_WORDS.forEach(word => {
+    finalLyric = finalLyric.replace(word, '')
+  })
+
+  console.log(chalk.blue('Format lyrics: finished \n \n'))
+
+  return finalLyric
+    .split(' ')
+    .filter(function (el) {
+      return el != '';
+    })
 }
 
 module.exports = {
