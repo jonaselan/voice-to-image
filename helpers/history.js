@@ -9,17 +9,21 @@ function formatContent(id) {
   return result
 }
 
-async function save(content) {
-  const jsonContent = load()
-  jsonContent.push(formatContent(content))
+function save(content) {
+  const historyContent = load()
+  const formatedContent = formatContent(content)
 
-  return fs.writeFileSync(historyFilePath, JSON.stringify(jsonContent))
+  historyContent.push(formatedContent)
+
+  fs.writeFile(historyFilePath, JSON.stringify(historyContent), { overwrite: true }, function (err) {
+    console.log('Error trying to save file');
+    if (err) throw err;
+  });
+
+  return true
 }
 
 function load() {
-  // TODO: verificar problema de estar quebrando o layout
-  // Criar arquivo se n existir
-
   const contentJson = fs.readFileSync(historyFilePath, 'utf-8')
 
   return JSON.parse(contentJson)
