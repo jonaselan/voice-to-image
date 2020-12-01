@@ -1,8 +1,8 @@
 const cheerio = require('cheerio')
 const chalk = require('chalk')
 const USELESS_WORDS = [
-  'can not', 'can\'t', 'don\'t', 'do not', 'wasn\'t', 'was not', 'it\'s', 'it is', 'i\'m', '[chorus]',
-  'in', 'are', 'be', 'of', 'is', 'so', 'to', 'he\'s', 'the', 'a', 'an', 'and', 'or', '.', ','
+  'fuck', 'can not', 'can\'t', 'don\'t', 'do not', 'wasn\'t', 'was not', 'it\'s', 'it is', 'i\'m', '[chorus]',
+  'fucking', 'in', 'are', 'be', 'of', 'is', 'so', 'to', 'he\'s', 'the', 'a', 'an', 'and', 'or', '.', ','
 ]
 const {
   GENIUS_API_URL,
@@ -39,7 +39,7 @@ async function fetchLyric(song_id) {
     });
 
     console.log(lyric)
-    console.log(chalk.blue(`Fetch lyric ${song_id}: finished`))
+    console.log(chalk.blue(`Fetch lyric ${song_id}: finished\n`))
 
     return lyric;
 
@@ -67,12 +67,16 @@ function formatLyric(rawLyric) {
     finalLyric = finalLyric.replace(word, '')
   })
 
-  console.log(chalk.blue('Format lyrics: finished \n \n'))
+  console.log(chalk.blue('Format lyrics: finished \n'))
 
   return finalLyric
+}
+
+function lyricToArray(lyric) {
+  return lyric
     .split(' ')
-    .filter(function (el) {
-      return el != '';
+    .filter(function (word) {
+      return word != '';
     })
 }
 
@@ -80,4 +84,5 @@ module.exports = {
   searchInGenius,
   fetchLyric,
   formatLyric,
+  lyricToArray
 }

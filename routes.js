@@ -7,15 +7,16 @@ const {
   searchInGenius,
   fetchLyric,
   formatLyric,
+  lyricToArray,
 } = require('./helpers/lyric');
 const history = require('./helpers/history');
 
 routes.get('/', async function (req, res) {
-  // DEBUG
+  // EXAMPLE
   // const song_id = 123
   // const images = [
   //   { title: 'yes.png', url: 'https://upload.wikimedia.org/wikipedia/commons/3/37/Yes_4G_Logo.png' },
-  //   { title: 'no.png', url: 'https://i.ya-webdesign.com/images/no-png-5.png'},
+  //   { title: 'no.png', url: 'https://i.ya-webdesign.com/images/no-png-5.png' },
   // ]
   // await downloadAndSave(song_id, images)
 
@@ -39,7 +40,9 @@ routes.get('/generate/:song_id', async function (req, res) {
   try {
     const rawLyric = await fetchLyric(song_id)
     const formattedlyric = formatLyric(rawLyric)
-    const images = await fetchImagesBasedOnLyrics(formattedlyric)
+    const lyricArray = lyricToArray(formattedlyric)
+    const images = await fetchImagesBasedOnLyrics(lyricArray)
+
     await downloadAndSave(song_id, images)
   }
   catch (error) {
