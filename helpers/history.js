@@ -17,7 +17,7 @@ function save(content) {
 
   fs.writeFile(historyFilePath, JSON.stringify(historyContent), { overwrite: true }, function (err) {
     console.log('Error trying to save file');
-    if (err) throw err;
+    if (error) throw error;
   });
 
   return true

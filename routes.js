@@ -1,7 +1,7 @@
 const routes = require('express').Router();
 const {
   fetchImagesBasedOnLyrics,
-  downloadAndSave,
+  downloadImages,
 } = require('./helpers/image');
 const {
   searchInGenius,
@@ -18,7 +18,7 @@ routes.get('/', async function (req, res) {
   //   { title: 'yes.png', url: 'https://upload.wikimedia.org/wikipedia/commons/3/37/Yes_4G_Logo.png' },
   //   { title: 'no.png', url: 'https://i.ya-webdesign.com/images/no-png-5.png' },
   // ]
-  // await downloadAndSave(song_id, images)
+  // await downloadImages(song_id, images)
 
   const histories = history.load()
   res.render('index.ejs', { histories });
@@ -43,7 +43,7 @@ routes.get('/generate/:song_id', async function (req, res) {
     const lyricArray = lyricToArray(formattedlyric)
     const images = await fetchImagesBasedOnLyrics(lyricArray)
 
-    await downloadAndSave(song_id, images)
+    await downloadImages(song_id, images)
   }
   catch (error) {
     errors.push(error.message)

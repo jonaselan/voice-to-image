@@ -50,7 +50,7 @@ async function fetchImagesBasedOnLyrics(lyric) {
   return result
 }
 
-async function downloadAndSave(folder, images) {
+async function downloadImages(folder, images) {
   if (images.length === 0) {
     console.log(chalk.blue(`Nothing to download...`))
     return
@@ -144,5 +144,5 @@ function pickRandomImage(links) {
 
 module.exports = {
   fetchImagesBasedOnLyrics,
-  downloadAndSave
+  downloadImages
 }
