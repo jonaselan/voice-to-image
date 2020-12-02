@@ -1,8 +1,9 @@
 const cheerio = require('cheerio')
 const chalk = require('chalk')
 const USELESS_WORDS = [
-  'fuck', 'can not', 'can\'t', 'don\'t', 'do not', 'wasn\'t', 'was not', 'it\'s', 'it is', 'i\'m', '[chorus]',
-  'fucking', 'in', 'are', 'be', 'of', 'is', 'so', 'to', 'he\'s', 'the', 'a', 'an', 'and', 'or', '.', ','
+  'fuck', 'can not', 'can\'t', 'don\'t', 'do not', 'wasn\'t', 'was not', 'it\'s',
+  'it is', 'i\'m', '[chorus]', '[pre-chorus]', 'fucking', 'in', 'are', 'be', 'of',
+  'is', 'so', 'to', 'he\'s', 'the', 'a', 'an', 'and', 'or', '.', ','
 ]
 const {
   GENIUS_API_URL,

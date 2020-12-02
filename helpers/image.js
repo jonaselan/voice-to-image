@@ -89,8 +89,8 @@ async function convertImages(title) {
   return new Promise((resolve, reject) => {
     const inputFile = fromRoot(`./${title}[0]`)
     const outputFile = fromRoot(`./${title}-converted.png`)
-    const width = 1920
-    const height = 1080
+    const width = 1280
+    const height = 720
 
     console.log(`Convert image ${title}: start`)
 
@@ -133,7 +133,8 @@ async function searchImages(word) {
     q: word,
     auth: GOOGLE_API_KEY,
     searchType: 'image',
-    num: MAX_IMAGE_RESULTS
+    num: MAX_IMAGE_RESULTS,
+    imgSize: 'medium'
   })
 }
 
